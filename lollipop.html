@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>LOLLIPOP</title>
+<!-- Load d3.js -->
+<!-- <script src="https://d3js.org/d3.v4.js"></script> -->
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://unpkg.com/d3fc@14.0.27/build/d3fc.js"></script>
+<script type='text/javascript' src='https://livejs.com/live.js'></script>
+<style>
+    /* body {
+        background-color: lightgrey;
+        width: 40%;
+        height: 20%;
+      } */
+ 
+    #my_dataviz {
+     width: 40%;
+     height: 100%;
+     position: center;
+     text-anchor: end;
+     color: #fff;
+     font-size: 13;
+     background-color: #090206;
+      }
+
+    #nxt {
+      /* position: right; */
+      color: red;
+    }
+    
+    #colorbar {
+      border-radius: 20px;
+      border: black;
+    }
+
+    .cmn-toggle {
+    position: absolute;
+    /* margin-left: -9999px; */
+    visibility: hidden;
+  }
+  .cmn-toggle + label {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    user-select: none;
+  }
+  input.cmn-toggle-round + label {
+    padding: 2px;
+    width: 120px;
+    height: 60px;
+    background-color: #dddddd;
+    border-radius: 60px;
+  }
+  input.cmn-toggle-round + label:before,
+  input.cmn-toggle-round + label:after {
+    display: block;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    bottom: 1px;
+    content: "";
+  }
+  input.cmn-toggle-round + label:before {
+    right: 1px;
+    background-color: #f1f1f1;
+    border-radius: 60px;
+    transition: background 0.4s;
+  }
+  input.cmn-toggle-round + label:after {
+    width: 58px;
+    background-color: #fff;
+    border-radius: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: margin 0.4s;
+  }
+  input.cmn-toggle-round:checked + label:before {
+    background-color: #8ce196;
+  }
+  input.cmn-toggle-round:checked + label:after {
+    margin-left: 60px;
+  }
+
+       </style>
+</head>
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+<input type="text" id="number" value="0"/>
+<button onclick="update(0)">Variable 1</button>
+<button id='nxt' onclick="update()">Next</button>
+<div class="switch">
+  <input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round" type="checkbox">
+  <label for="cmn-toggle-1"></label>
+</div>
+<div id = 'colorbar'></div>
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 20, left: 100},
+        width = 260 - margin.left - margin.right,
+        height = 250 - margin.top - margin.bottom;
+    
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + margin.left + "," + margin.top + ")");
+
+    // Add X axis
+    var x = d3.scaleLinear()
+      .range([ 0, width ]);
+    var xAxis = svg.append("g")
+        .attr("class", "myXaxis")
+        .style('display', 'none')
+
+    // Y axis
+    var y = d3.scaleBand()
+      .range([ 0, height ])
+      .padding(1);   
+      
+    var yAxis = svg.append("g")
+      .attr("class", "myYaxis")
+      // .attr("transform", "translate(0," + 0+ ")")
+      // .style('color','red')
+
+    // colorbar
+    const container = d3.select("#colorbar");
+    const colourScale = d3
+    	.scaleSequential(d3.interpolateRdYlGn)
+    	.domain([0, 100]);
+    const domain = colourScale.domain();
+    
+    const bar_width = 100;
+    const bar_height = 400;
+    
+    const paddedDomain = fc.extentLinear()
+  		.pad([0.02, 0.02])
+  		.padUnit("percent")(domain);
+		const [min, max] = paddedDomain;
+		const expandedDomain = d3.range(min, max, (max - min) / bar_height);
+    
+    const xScale = d3
+    	.scaleBand()
+    	.domain([0, 1])
+    	.range([0, bar_width]);
+    
+    const yScale = d3
+    	.scaleLinear()
+    	.domain(paddedDomain)
+    	.range([bar_height, 0]);
+
+    // const yScale = d3
+    // 	.scaleBand()
+    // 	.domain(['x', 'y','z'])
+    // 	.range([bar_height, 0]);
+    
+    const svgBar = fc
+      .autoBandwidth(fc.seriesSvgBar())
+      .xScale(xScale)
+      .yScale(yScale)
+      .crossValue(0)
+      .baseValue((_, i) => (i > 0 ? expandedDomain[i - 1] : 0))
+      .mainValue(d => d)
+      .decorate(selection => {
+        selection.selectAll("path").style("fill", d => colourScale( 100 - d));
+      });
+
+    const new_names = {0: 'Mild', 100:'Severe'};
+
+    const axisLabel = fc
+      .axisRight(yScale)
+      .tickValues([...domain])
+      .tickSizeOuter(0)
+      .decorate((s) => s.selectAll('text')
+      .style('fill', 'blue')
+      .html(d => new_names[d])
+      );
+
+    const legendSvg = container.append("svg")
+    	.attr("height", bar_height)
+    	.attr("width", bar_width)
+      .style('float', 'right')
+      // .attr("transform", `translate(90, 0)`)
+      .style("border-radius", "25px");;
+    
+    const legendBar = legendSvg
+    	.append("g")
+    	.datum(expandedDomain)
+    	.call(svgBar);
+    
+    const barWidth = Math.abs(legendBar.node().getBoundingClientRect().x);
+    console.log(barWidth);
+    legendSvg.append("g")
+    	.attr("transform", `translate(20, 0)`)
+      .datum(expandedDomain)
+      .call(axisLabel)
+      .select(".domain")
+      .attr("visibility", "hidden");
+    
+    container
+    .style("margin", "1em")
+    
+  
+    // svg.select("g")
+    //       .call(d3.axisLeft(y))
+          // .selectAll("text")
+          //   .style("text-anchor", "end")
+          //   .style('color', '#fff')
+          //   .style("font-size", "13")
+
+    function update(cluster_num) {
+      d3.csv("word_frequencies.csv", d3.autoType).then((data) => {
+      // console.log(data.map(d => d.text));
+          var data = data.filter(d => d.cluster == cluster_num);
+
+          // v5 sorting if necessary
+          // data = data.sort((a, b) => d3.descending(a.frequency, b.frequency))
+
+          // Add X axis
+          x.domain([0, d3.max(data, d => d.frequency)])
+          xAxis.transition().duration(1000).call(d3.axisBottom(x))
+            
+          // X axis
+          x.domain([0, d3.max(data, d => d.frequency)])
+          xAxis
+              .transition()
+              .duration(1000)
+              .call(d3.axisBottom(x));
+
+          // Add Y axis
+          y.domain(data.map(function(d) { return d.text; }))
+          
+          yAxis
+              .transition()
+              .duration(1000)
+              .call(d3.axisLeft(y))
+              .style("text-anchor", "end")
+              .style('color', '#fff')
+              .style("font-size", "13");
+            
+            // variable j: map data to existing lines
+          var j = svg.selectAll(".myLine")
+              .data(data);
+
+          // update lines
+          j
+              .enter()
+              .append("line")
+              .attr("class", "myLine")
+              .merge(j)
+              .transition()
+              .duration(1000)
+              .attr("x1", function(d) { return x(d.frequency); })
+              .attr("x2", x(0))
+              .attr("y1", function(d) { return y(d.text); })
+              .attr("y2", function(d) { return y(d.text); })
+              .attr("stroke", "grey");
+
+          // variable u: map data to existing circles
+          var u = svg.selectAll("circle")
+              .data(data)
+
+          // update circles
+          u
+              .enter()
+              .append("circle")
+              .merge(u)
+              .transition()
+              .duration(1000)
+              .attr("cx", function(d) { return x(d.frequency); })
+              .attr("cy", function(d) { return y(d.text); })
+              .attr("r", 4)
+              .attr("fill", "#69b3a2");
+
+      })
+  };
+
+  update(0);
+
+  window.onload = function(){
+    document.getElementById('nxt').onclick = function(){
+      var value = parseInt(document.getElementById('number').value, 10);
+      value++;
+      console.log('hitting next button', value);
+      update(value);
+      };
+  };
+    
+    </script>
