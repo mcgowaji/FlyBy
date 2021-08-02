@@ -16,7 +16,7 @@
 </head>
 <body>
   <div id='chartholder'>
-    <img id='logo' src="Topologe Logo Alpha+ (1).png" >
+    <img id='logo' src="logo_alpha.png" >
     <div id='triage'>Incidents triaged: 0.</div>
   <div id="searchbar">
     <input type="search" placeholder=" Filter by keyword..." onkeydown='blink()'>
@@ -69,7 +69,7 @@
   var incidents = 0;
   var dotTransparency = 0.2;
   var numPoints = 500;
-  var dotSize = 0.4;
+  var dotSize = 0.2;
   
   // init colors 
   var colorRange = Array.from({length: 10}, (x, i) => i/10);
@@ -101,7 +101,7 @@
       .domain([0, 1])
       .range([0, 40]);
 
-    var view_pos = [80, 20, 80];
+    var view_pos = [360, 20, 360];
     var fov = 1;
     var view_or = [0, 1, 0, 0.8];
 
@@ -176,15 +176,12 @@
     // Background globe lines
     scene.append('inline')
       .attr('url', 'CircleLinesSphereLatitude.x3d')
-
   };
 
   // Generate Chart from my CSV Data
   d3.csv('embeddings_sample.csv')
     .then((data) => {
-      // data = data.filter(d => d.Cluster < 20)
-      console.log('length of data', data.length);
-      // console.log( d3.extent(data, d => d[0], d[1]) )
+      console.log('length of data: ', data.length);
       var points = data.map((d, i) => {
         var p = {};
         p.x = +d.x;
@@ -231,10 +228,6 @@
   }
 
   function handleclick(target, event) {
-
-    // d3.select(event.hitObject)
-    //    .attr("transform", function(d) { console.log('transforming coordinates...');
-    //      return "translate(100 0 0)"; })
 
     d3.select('#summary')
       .style('display', 'inline');
@@ -283,7 +276,7 @@
     return new Promise((resolve) => {
       document.addEventListener('keydown', onKeyHandler);
       function onKeyHandler(e) {
-        console.log(e.key+ ' pressed, code # ' + e.keyCode);
+        // console.log(e.key+ ' pressed, code # ' + e.keyCode);
         if (e.key === 'Enter') {
           document.removeEventListener('keydown', onKeyHandler);
           resolve();
@@ -297,7 +290,6 @@
     await waitingKeypress();
     var txt = d3.select('input[type=search]').node().value;
     var duration = 500;
-    console.log('waited for: ', txt);
     d3.selectAll('.point')
       .select('appearance')
       .select('material')
@@ -343,15 +335,15 @@
     
     var slidingPoints = d3.selectAll('.point')
       .filter(function(d) {  
-        if (d.cluster === clicked.__data__.cluster) { count++}
-        return d.cluster === clicked.__data__.cluster});
+        if (d.cluster === clicked.__data__.cluster) { count++};
+        return d.cluster === clicked.__data__.cluster
+      });
     // reposition points to be in a circle around the globe edges
     var radius = 250;
     var phase = 2 * Math.PI * (choice - 1) / 8;
     var new_x = Math.round(radius * Math.cos(phase));
     var new_y = Math.round(radius * Math.sin(phase));
-    console.log('points selected: ', count);
-    console.log('New points translation:', new_x, new_y)
+
     slidingPoints.transition()  // Move each box to the right point location
         .duration(2000)
         .attr("translation",function(d) { 

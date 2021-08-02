@@ -12,8 +12,8 @@ body {
 #triage {
   color:#fff;
   position: absolute;
-  left: 2vw;
-  top: 8vh;  
+  left: 3vw;
+  top: 9vh;  
   padding: 5px;
   background-color: #090206;
   border:3px rgb(0, 104, 55) solid;
@@ -45,16 +45,6 @@ body {
   color:#fff;
   z-index:9001;
 }
-
-#colorbar {
-  /* z-index:9998;
-  position: absolute;
-  right: 2vw;
-  top: 100px;  
-  float:right; */
-  /* margin: 2em; */
-}
-
 
 #wordcloud {
   display: none;

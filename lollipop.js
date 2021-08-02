@@ -3,8 +3,6 @@ var l_width = window.innerWidth/6,
     margin = {top: l_height/30, right: l_width / 4, bottom: l_height/10, left: l_width / 3};
     // margin = {top: 10, right: 40, bottom: 40, left: 60};
     
-
-console.log('margins?', margin, l_width)
 // append the svg object to the body of the page
 var svg = d3.select("#wordcloud")
     .append("svg")
@@ -31,8 +29,6 @@ var yAxis = svg.append("g")
 
 function update(cluster_num) {
     d3.csv("word_frequencies.csv", d3.autoType).then((data) => {
-        console.log('Updating lollipop chart with cluster ', cluster_num);
-        console.log('Lollipop dimensions: ', l_width, l_height);
         var data = data.filter(d => d.cluster == cluster_num);
         // v5 sorting if necessary
         // data = data.sort((a, b) => d3.descending(a.frequency, b.frequency))

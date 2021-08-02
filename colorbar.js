@@ -59,14 +59,13 @@ const svgBar = fc
     	.call(svgBar);
     
     const barWidth = Math.abs(legendBar.node().getBoundingClientRect().x);
-    console.log(barWidth);
+
     legendSvg.append("g")
     	.attr("transform", `translate(20, 0)`)
       .datum(expandedDomain)
       .call(axisLabel)
       .select(".domain")
       .attr("visibility", "hidden");
-
           
     container
     .style("margin", "-3em")
@@ -75,5 +74,3 @@ const svgBar = fc
     .style('right', '25px')
     .style('z-index', '9998')
 
-
-console.log('drawing colorbar...')
