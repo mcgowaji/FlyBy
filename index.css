@@ -110,7 +110,7 @@ body {
   float: left; 
   width: 5vw;
   z-index:9998;
-  display: none;
+  display: inline;
 }
 
 /* Create ellipse with two buttons */
@@ -152,7 +152,7 @@ body {
   color:#515151;
 }
 /* Add a background color on hover */
-.btn-group button:hover {
+a:hover {
   background-color: #3e8e41;
   background:#b7b7b7;
 }
@@ -193,3 +193,28 @@ input[type=search]:focus {
   opacity: 1;
 }
 
+a {
+  position: absolute;
+  top: 20px;
+  right: 8vw; 
+  z-index: 9999;      
+  background: #ccc;
+  color: white;
+  cursor: pointer;
+  border-top: solid 2px #eaeaea;
+  border-left: solid 2px #eaeaea;
+  border-bottom: solid 2px #777;
+  border-right: solid 2px #777;
+  padding: 5px;    
+  border-radius: 20px;
+  margin-right: 100px;
+  
+  }
+
+a.down {
+  background: #bbb;
+  border-top: solid 2px #777;
+  border-left: solid 2px #777;
+  border-bottom:solid 2px  #eaeaea;
+  border-right: solid 2px #eaeaea;
+  }

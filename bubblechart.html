@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3"></script>
   <script src="https://unpkg.com/d3fc@14.0.27/build/d3fc.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script type='text/javascript' src='https://livejs.com/live.js'></script>
   <link rel='stylesheet' href='https://x3dom.org/download/dev/x3dom.css'/>
   <link rel='stylesheet' type='text/css' href='./index.css' />
@@ -22,8 +23,9 @@
     <input type="search" placeholder=" Filter by keyword..." onkeydown='blink()'>
     <span id='searchClose' onclick='resetSearch()'>x</span>
     <div class="btn-group">
-      <button id = 'simple'>Simple</button>
-      <button id = 'advanced'>Advanced</button>
+      <a id="button" title="button">Advanced Search</a>
+      <!-- <button id = 'simple'>Simple</button>
+      <button id = 'advanced'>Advanced</button> -->
     </div>
   </div>
   <div id ='wordcloud'>
@@ -66,6 +68,7 @@
   };
   
   var clicked;
+  var advanced = false;
   var incidents = 0;
   var dotTransparency = 0.2;
   var numPoints = 500;
@@ -247,30 +250,7 @@
     update(target.__data__.cluster);
 
     clicked = target;
-
-    // console.log(target.translation + ' clicked.')
-    // d3.select('.point')
-    //   .transition()
-    //   .duration(1000)
-    //   .attr('translation', function(d){
-    //     console.log('New coords: ', 100 + x_scale(d.x) + ' ' + y_scale(d.y) + ' ' + z_scale(d.z));
-    //               return 100 + x_scale(d.x) + ' ' + y_scale(d.y) + ' ' + z_scale(d.z)
-    //       })
-
   };
-
-
-  function getText() {
-    return new Promise((resolve) => {
-      document.addEventListener('keydown', onKeyHandler);
-      function onKeyHandler(e) {
-        if (event.key === 'Enter') {
-          document.removeEventListener('keydown', onKeyHandler);
-          resolve();
-        }
-      }
-    });
-  }
 
   function waitingKeypress() {
     return new Promise((resolve) => {
@@ -290,33 +270,54 @@
     await waitingKeypress();
     var txt = d3.select('input[type=search]').node().value;
     var duration = 500;
-    d3.selectAll('.point')
-      .select('appearance')
-      .select('material')
-      .transition()
-      .duration(duration)
-      .attr('transparency', 0.8)
-      .filter(function(d, i) {  
-          return d.synopsis.includes(txt)})
-      .transition()
-      .duration(duration)
-      .attr('transparency', 0.8)
-      .transition()
-      .duration(duration)
-      .attr('transparency', 0)
-      // .transition()
-      // .duration(duration)
-      // .attr('transparency', 0.8)
-      // .transition()
-      // .duration(duration)
-      // .attr('transparency', dotTransparency)
+    console.log('current status of button: ', advanced);
+    // run advanced search if button pressed, else simple word search
+    if (advanced)  {
+      d3.selectAll('.point')
+        .select('appearance')
+        .select('material')
+        // .transition()
+        // .duration(duration)
+        // .attr('transparency', 1)
+        .filter(function(d, i) {  
+            return d.synopsis.includes(txt)})
+        .transition()
+        .duration(duration)
+        .attr('transparency', 1)
+        .transition()
+        .duration(duration)
+        .attr('transparency', 0)
+    } else { 
+      d3.csv("word_frequencies.csv", d3.autoType).then((data) => {
+        // var data = data.filter(d => d.text == txt.toLowerCase());
+        var filtered = data.reduce((a, o) => (o.text == txt.toLowerCase() && a.push(o.cluster), a), [])
+
+        // create array of relevant clusters
+        console.log('matches: ', data);
+        d3.selectAll('.point')
+          .select('appearance')
+          .select('material')
+          .transition()
+          .duration(duration)
+          .attr('transparency', 1)
+          .filter(function(d, i) {  
+              return filtered.includes(d.cluster)
+            })
+          .transition()
+          .duration(duration)
+          .attr('transparency', 1)
+          .transition()
+          .duration(duration)
+          .attr('transparency', 0);     
+      })
+    };
   };
 
   function resetSearch() {
     d3.selectAll('.point')
     .select('appearance')
     .select('material')
-    .attr('transparency', 0.1)
+    .attr('transparency', dotTransparency)
   };
 
   function selectDept() {
@@ -368,16 +369,15 @@
 
     document.getElementById('wordcloudClose').onclick = function(){
       document.getElementById('wordcloud').style.display='none'
-    };
-
-    document.getElementById('simple').onclick = function() {
-          $(this).toggleClass("down");
-    }
-
-    document.getElementById('chartholder').oncontextmenu = function () {
-      alert('Right Click')
-    }
+    }; 
   } 
+
+  $(document).ready(function(){
+      $('a#button').click(function(){
+        $(this).toggleClass("down");
+        advanced = !$(this).attr('class')
+      });
+  });
   </script>
   <script type='text/javascript' src='./lollipop.js'></script>
   <script type='text/javascript' src='./colorbar.js'></script>
