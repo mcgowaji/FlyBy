@@ -220,6 +220,12 @@
         .transition()
         .duration(200)
         .attr('radius', dotSize * 2)
+
+      d3.select('#summary')
+        .style('display', 'inline');
+    
+      d3.select('.sumText')
+        .html(target.__data__.synopsis);
   };
 
   function handlemouseout(target, event) {
@@ -232,11 +238,11 @@
 
   function handleclick(target, event) {
 
-    d3.select('#summary')
-      .style('display', 'inline');
+    // d3.select('#summary')
+    //   .style('display', 'inline');
     
-    d3.select('.sumText')
-      .html(target.__data__.synopsis);
+    // d3.select('.sumText')
+    //   .html(target.__data__.synopsis);
 
     d3.select('#wordcloud')
       .style('display', 'inline');
