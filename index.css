@@ -174,7 +174,7 @@ input[type=search]:focus {
   position: absolute;
   font-size: 16px;
   padding: 0.5px 4px;
-  background:#8e8e8e;
+  background:#b7b7b7;
   border-radius: 0px 15px 15px 0px;
   color:#fff;
   z-index: 9999;

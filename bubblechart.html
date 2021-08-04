@@ -68,9 +68,9 @@
   var clicked;
   // var advanced = false;
   var incidents = 0;
-  var dotTransparency = 0.1;
+  var dotTransparency = 0;
   var numPoints = 500;
-  var dotSize = 0.12;
+  var dotSize = 0.14;
   
   // init colors 
   var colorRange = Array.from({length: 10}, (x, i) => i/10);
@@ -217,7 +217,7 @@
         .select('sphere')
         .transition()
         .duration(200)
-        .attr('radius', dotSize * 3)
+        .attr('radius', dotSize * 2)
 
       d3.select('#summary')
         .style('display', 'inline');
