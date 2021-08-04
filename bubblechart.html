@@ -210,8 +210,8 @@
       d3.select(".label")
           .attr('translation', target.translation);
 
-      d3.select(".labelText")
-          .attr('string', Math.round(target.__data__.severity) + '   ');
+      // d3.select(".labelText")
+      //     .attr('string', Math.round(target.__data__.severity) + '   ');
 
       d3.select(event.hitObject)
       .call(makeSolid, 'blue')
@@ -369,8 +369,8 @@
         })
 
     // Get rid of label
-    d3.select(".labelText")
-      .attr('string', ' ');
+    // d3.select(".labelText")
+    //   .attr('string', ' ');
 
     // Add to triage total
     incidents += count;
