@@ -17,36 +17,34 @@
 </head>
 <body>
   <div id='chartholder'>
-    <img id='logo' src="logo_alpha.png" >
-    <div id='triage'>Incidents triaged: 0.</div>
-  <div id="searchbar">
-    <input type="search" placeholder=" Filter by keyword..." onkeydown='blink()'>
-    <span id='searchClose' onclick='resetSearch()'>x</span>
-    <div class="btn-group">
-      <a id="button" title="button">Advanced Search</a>
-      <!-- <button id = 'simple'>Simple</button>
-      <button id = 'advanced'>Advanced</button> -->
+      <img id='logo' src="logo_alpha.png" >
+      <div id='triage'>Incidents triaged: 0.</div>
+    <div id="searchbar">
+      <input type="search" placeholder=" Filter by keyword..." onkeydown='blink()'>
+      <span id='searchClose' onclick='resetSearch()'>x</span>
     </div>
-  </div>
-  <div id ='wordcloud'>
-    <span id='wordcloudClose'>x</span>
-     </div>
-  <div id ='summary'>
-    <span id='summaryClose'>x</span>
-    <p class='sumText'></p>
-  </div>
-  <div id = 'colorbar'></div>
-  <select id = "opts" onchange="selectDept();" onfocus="this.selectedIndex = 0;">
-    <option value="" disabled selected>-Select Department-</option>
-    <option value="1">Human Factors</option>
-    <option value="2">Aircraft</option> 
-    <option value="3">Equipment / Tooling</option>
-    <option value="4">Human Factors</option>
-    <option value="5">Weather</option>
-    <option value="6">ATC Equipment</option>
-    <option value="7">Staffing </option>
-    <option value="8">Trash</option>
-     </select>
+    <div id ='wordcloud'>
+      <span id='wordcloudClose'>x</span>
+      </div>
+    <div id ='summary'>
+      <span id='summaryClose'>x</span>
+      <p class='sumText'></p>
+    </div>
+    <div id = 'colorbar'></div>
+    <div>
+      <select id = "opts" onchange="selectDept();" onfocus="this.selectedIndex = 0;">
+        <option value="" disabled selected>-Select Department-</option>
+        <option value="1">Human Factors</option>
+        <option value="2">Aircraft</option> 
+        <option value="3">Equipment / Tooling</option>
+        <option value="4">Human Factors</option>
+        <option value="5">Weather</option>
+        <option value="6">ATC Equipment</option>
+        <option value="7">Staffing </option>
+        <option value="8">Trash</option>
+        </select>
+      <span id='optsClose'>x</span>
+    </div>
   </div>
   
   <script>
@@ -68,11 +66,11 @@
   };
   
   var clicked;
-  var advanced = false;
+  // var advanced = false;
   var incidents = 0;
-  var dotTransparency = 0.2;
+  var dotTransparency = 0.1;
   var numPoints = 500;
-  var dotSize = 0.08;
+  var dotSize = 0.12;
   
   // init colors 
   var colorRange = Array.from({length: 10}, (x, i) => i/10);
@@ -184,6 +182,7 @@
   // Generate Chart from my CSV Data
   d3.csv('embeddings_sample.csv')
     .then((data) => {
+      // data = data.filter(d => d.Cluster == 3)
       console.log('length of data: ', data.length);
       var points = data.map((d, i) => {
         var p = {};
@@ -207,7 +206,6 @@
 
   // Callbacks
   function handlemouseover(target, event) {
-      console.log('mousing over', target.translation, );
 
       d3.select(".label")
           .attr('translation', target.translation);
@@ -219,7 +217,7 @@
         .select('sphere')
         .transition()
         .duration(200)
-        .attr('radius', dotSize * 2)
+        .attr('radius', dotSize * 3)
 
       d3.select('#summary')
         .style('display', 'inline');
@@ -253,6 +251,11 @@
       .style("left", (event.layerX + 30) + "px")
       .style("top", (event.layerY) + "px");
 
+    d3.select('#optsClose')
+      .style("display", "inline")
+      .style("left", (event.layerX + 170) + "px")
+      .style("top", (event.layerY) + "px");
+
     update(target.__data__.cluster);
 
     clicked = target;
@@ -274,49 +277,49 @@
   async function blink() {
     // if (txt == null || txt === '') { return }
     await waitingKeypress();
-    var txt = d3.select('input[type=search]').node().value;
+    var txt = d3.select('input[type=search]').node().value.toLowerCase();
     var duration = 500;
-    console.log('current status of button: ', advanced);
-    // run advanced search if button pressed, else simple word search
-    if (advanced)  {
-      d3.selectAll('.point')
-        .select('appearance')
-        .select('material')
-        .transition()
-        .duration(duration/2)
-        .attr('transparency', 1)
-        .filter(function(d, i) {  
-            return d.synopsis.includes(' '+txt+' ')})
-        .transition()
-        .duration(duration)
-        .attr('transparency', 1)
-        .transition()
-        .duration(duration)
-        .attr('transparency', 0)
-    } else { 
-      d3.csv("word_frequencies.csv", d3.autoType).then((data) => {
-        // var data = data.filter(d => d.text == txt.toLowerCase());
-        var filtered = data.reduce((a, o) => (o.text == txt.toLowerCase() && a.push(o.cluster), a), [])
 
-        // create array of relevant clusters
-        console.log('matches: ', data);
-        d3.selectAll('.point')
-          .select('appearance')
-          .select('material')
-          .transition()
-          .duration(duration)
-          .attr('transparency', 1)
-          .filter(function(d, i) {  
-              return filtered.includes(d.cluster)
-            })
-          .transition()
-          .duration(duration)
-          .attr('transparency', 1)
-          .transition()
-          .duration(duration)
-          .attr('transparency', 0);     
-      })
-    };
+    d3.selectAll('.point')
+      .select('shape')
+      .select('appearance')
+      .select('material')
+      .transition()
+      .duration(duration)
+      .attr('transparency', 1)
+      
+      .filter(function(d, i) {  
+          return d.synopsis.toLowerCase().includes(txt)})
+      .transition()
+      .duration(duration)
+      .attr('transparency', 1)
+      .transition()
+      .duration(duration)
+      .attr('transparency', 0)
+    // } else { 
+    //   d3.csv("word_frequencies.csv", d3.autoType).then((data) => {
+    //     // var data = data.filter(d => d.text == txt.toLowerCase());
+    //     var filtered = data.reduce((a, o) => (o.text == txt && a.push(o.cluster), a), [])
+
+    //     // create array of relevant clusters
+    //     console.log('searching'+txt+'. matches: ', data);
+    //     d3.selectAll('.point')
+    //       .select('appearance')
+    //       .select('material')
+    //       .transition()
+    //       .duration(duration)
+    //       .attr('transparency', 1)
+    //       .filter(function(d, i) {  
+    //           return filtered.includes(d.cluster)
+    //         })
+    //       .transition()
+    //       .duration(duration)
+    //       .attr('transparency', 1)
+    //       .transition()
+    //       .duration(duration)
+    //       .attr('transparency', 0);     
+    //   })
+    // };
   };
 
   function resetSearch() {
@@ -331,7 +334,11 @@
 
     d3.select('#opts')
       .style('display', 'none')
+
+    d3.select('#optsClose')
+      .style('display', 'none')
       
+
 
     movePoints(choice);
   }
@@ -376,16 +383,23 @@
     document.getElementById('wordcloudClose').onclick = function(){
       document.getElementById('wordcloud').style.display='none'
     }; 
+
+    document.getElementById('optsClose').onclick = function(){
+      document.getElementById('opts').style.display='none';
+      document.getElementById('optsClose').style.display='none';
+
+    }; 
   } 
 
-  $(document).ready(function(){
-      $('a#button').click(function(){
-        $(this).toggleClass("down");
-        advanced = !$(this).attr('class')
-      });
-  });
+  // $(document).ready(function(){
+  //     $('a#button').click(function(){
+  //       $(this).toggleClass("down");
+  //       advanced = !$(this).attr('class')
+  //     });
+  // });
   </script>
   <script type='text/javascript' src='./lollipop.js'></script>
   <script type='text/javascript' src='./colorbar.js'></script>
 </body>
 </html>
+

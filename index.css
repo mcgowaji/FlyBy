@@ -95,7 +95,8 @@ body {
 #summaryClose {
   float:right;
   display:inline;
-  padding:2px 5px;
+  padding: 1px 4px;
+  margin: -3px;
   background:#ccc;
   border-radius: 5px;
   color:#fff;
@@ -113,31 +114,6 @@ body {
   display: inline;
 }
 
-/* Create ellipse with two buttons */
-#simple {
-  border-radius: 20px 0px 0px 20px;
-  position: absolute;
-  top: 20px;
-  right: 17.5vw;
-}
-
-/* #simple.down {
-  background: #bbb;
-
-  border-top: solid 2px #777;
-  border-left: solid 2px #777;
-  border-bottom: solid 2px #eaeaea;
-  border-right: solid 2px #eaeaea;
-} */
-
-#advanced {
-  border-radius: 0px 20px 20px 0px;
-  margin-right: 100px;
-  position: absolute;
-  top: 20px;
-  right: 6.5vw;
-}
-
 .btn-group button:not(:last-child) {
   border-right: none; /* Prevent double borders */
 }
@@ -152,10 +128,10 @@ body {
   color:#515151;
 }
 /* Add a background color on hover */
-a:hover {
+/* a:hover {
   background-color: #3e8e41;
   background:#b7b7b7;
-}
+} */
 
 .btn-group.down {
   background: #b7b7b7;
@@ -188,11 +164,23 @@ input[type=search]:focus {
 #opts {
   display: none;
   position: absolute;
-  border-radius: 15px;
+  border-radius: 15px 0px 0px 15px;
   z-index: 9999;
   opacity: 1;
 }
 
+#optsClose {
+  display: none;
+  position: absolute;
+  font-size: 16px;
+  padding: 0.5px 4px;
+  background:#8e8e8e;
+  border-radius: 0px 15px 15px 0px;
+  color:#fff;
+  z-index: 9999;
+  opacity: 1;
+}
+/* 
 a {
   position: absolute;
   top: 20px;
@@ -217,4 +205,4 @@ a.down {
   border-left: solid 2px #777;
   border-bottom:solid 2px  #eaeaea;
   border-right: solid 2px #eaeaea;
-  }
+  } */
