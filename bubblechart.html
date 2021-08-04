@@ -214,10 +214,11 @@
           .attr('string', Math.round(target.__data__.severity) + '   ');
 
       d3.select(event.hitObject)
-        .select('sphere')
-        .transition()
-        .duration(200)
-        .attr('radius', dotSize * 2)
+      .call(makeSolid, 'blue')
+        // .select('sphere')
+        // .transition()
+        // .duration(200)
+        // .attr('radius', dotSize * 1.5)
 
       d3.select('#summary')
         .style('display', 'inline');
@@ -228,10 +229,14 @@
 
   function handlemouseout(target, event) {
     d3.select(event.hitObject)
-      .select('sphere')
-      .transition()
-      .duration(200)
-      .attr('radius', dotSize)
+      .call(makeGhost, function(d) { 
+            return rgbToHex(d3.interpolateRdYlGn(1 - d.severity/100))
+        })
+
+      // .select('sphere')
+      // .transition()
+      // .duration(200)
+      // .attr('radius', dotSize)
   }
 
   function handleclick(target, event) {
@@ -244,7 +249,6 @@
 
     d3.select('#wordcloud')
       .style('display', 'inline');
-
 
     d3.select("#opts")
       .style("display", "inline")
