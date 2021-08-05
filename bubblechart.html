@@ -71,7 +71,6 @@
   // var advanced = false;
   var incidents = 0;
   var dotTransparency = 0;
-  var numPoints = 500;
   var dotSize = 0.14;
   
   // init colors 
@@ -184,7 +183,7 @@
   // Generate Chart from my CSV Data
   d3.csv('embeddings_sample.csv')
     .then((data) => {
-      // data = data.filter(d => d.Cluster == 3)
+      // data = data.filter(d => d.Cluster == 100);
       console.log('length of data: ', data.length);
       var points = data.map((d, i) => {
         var p = {};
@@ -196,9 +195,7 @@
         p.severity = +d.Severity;
         return p;
       });
-      
-      // load specific # of points for development
-      // loadChart(points.slice(0, numPoints));
+
       loadChart(points);
 
     })
@@ -216,11 +213,9 @@
       //     .attr('string', Math.round(target.__data__.severity) + '   ');
 
       d3.select(event.hitObject)
-      .call(makeSolid, 'blue')
-        // .select('sphere')
-        // .transition()
-        // .duration(200)
-        // .attr('radius', dotSize * 1.5)
+          .select('appearance')
+          .select('material')
+          .attr('diffuseColor', 'blue');
 
       d3.select('#summary')
         .style('display', 'inline');
@@ -231,14 +226,11 @@
 
   function handlemouseout(target, event) {
     d3.select(event.hitObject)
-      .call(makeGhost, function(d) { 
+       .select('appearance')
+        .select('material')
+        .attr('diffuseColor', function(d) { 
             return rgbToHex(d3.interpolateRdYlGn(1 - d.severity/100))
         })
-
-      // .select('sphere')
-      // .transition()
-      // .duration(200)
-      // .attr('radius', dotSize)
   }
 
   function handleclick(target, event) {
@@ -259,7 +251,7 @@
 
     d3.select('#optsClose')
       .style("display", "inline")
-      .style("left", (event.layerX + 170) + "px")
+      .style("left", (event.layerX + 180) + "px")
       .style("top", (event.layerY) + "px");
 
     update(target.__data__.cluster);
@@ -279,60 +271,26 @@
       }
     });
   }
-   // Goes on after 1 second
+
   async function blink() {
-    // if (txt == null || txt === '') { return }
+    // wait for enter key to execute query
     await waitingKeypress();
     var txt = d3.select('input[type=search]').node().value.toLowerCase();
-    var duration = 500;
 
     d3.selectAll('.point')
-      .select('shape')
-      .select('appearance')
-      .select('material')
-      .transition()
-      .duration(duration)
-      .attr('transparency', 1)
-      
+      .attr('render', 'false')
       .filter(function(d, i) {  
+          if (d.synopsis.toLowerCase().includes(txt)) {console.log(d.synopsis.toLowerCase())};
           return d.synopsis.toLowerCase().includes(txt)})
-      .transition()
-      .duration(duration)
-      .attr('transparency', 1)
-      .transition()
-      .duration(duration)
-      .attr('transparency', 0)
-    // } else { 
-    //   d3.csv("word_frequencies.csv", d3.autoType).then((data) => {
-    //     // var data = data.filter(d => d.text == txt.toLowerCase());
-    //     var filtered = data.reduce((a, o) => (o.text == txt && a.push(o.cluster), a), [])
+      .attr('render', 'true')
 
-    //     // create array of relevant clusters
-    //     console.log('searching'+txt+'. matches: ', data);
-    //     d3.selectAll('.point')
-    //       .select('appearance')
-    //       .select('material')
-    //       .transition()
-    //       .duration(duration)
-    //       .attr('transparency', 1)
-    //       .filter(function(d, i) {  
-    //           return filtered.includes(d.cluster)
-    //         })
-    //       .transition()
-    //       .duration(duration)
-    //       .attr('transparency', 1)
-    //       .transition()
-    //       .duration(duration)
-    //       .attr('transparency', 0);     
-    //   })
-    // };
   };
 
   function resetSearch() {
     d3.selectAll('.point')
-    .select('appearance')
-    .select('material')
-    .attr('transparency', dotTransparency)
+      .attr('render', 'true');
+
+    d3.select('input[type=search]').node().value = '';
   };
 
   function selectDept() {
@@ -344,8 +302,6 @@
     d3.select('#optsClose')
       .style('display', 'none')
       
-
-
     movePoints(choice);
   }
 
