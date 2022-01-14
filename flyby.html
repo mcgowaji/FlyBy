@@ -218,6 +218,7 @@
       function loadCSV(path) {
         d3.csv(path)
           .then((data) => {
+            data = data.slice(0, 1000);
             console.log("length of data: ", data.length);
             console.log(data.slice(0, 3));
             var points = data.map((d, i) => {
@@ -248,7 +249,7 @@
 
         d3.select(".labelText").attr(
           "string",
-          attacks[target.__data__.cluster] + "   "
+          attacks[target.__data__.attack_cat] + "   "
         );
 
         d3.select(event.hitObject)
