@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Data FlyBy</title>
+    <link rel="icon" href="favicon.ico?v=1.1" sizes="32x32" />
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://x3dom.org/download/dev/x3dom-full.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-color@3"></script>
@@ -67,7 +68,7 @@
     </div>
 
     <script>
-      var datapath = "embeddings_sample.csv";
+      var datapath = "cyber_embed_sample.csv";
       var wordFreqs;
       var makeSolid = function (selection, color) {
         selection
@@ -92,7 +93,39 @@
       var dotSize = 0.14;
 
       // init colors
-      var colorRange = Array.from({ length: 10 }, (x, i) => i / 10);
+      const colors = [
+        "#4E79A7",
+        "#A0CBE8",
+        "#F28E2B",
+        "#FFBE7D",
+        "#59A14F",
+        "#8CD17D",
+        "#B6992D",
+        "#F1CE63",
+        "#499894",
+        "#86BCB6",
+        "#E15759",
+        "#FF9D9A",
+        "#79706E",
+        "#BAB0AC",
+        "#D37295",
+        "#FABFD2",
+        "#B07AA1",
+        "#D4A6C8",
+        "#9D7660",
+        "#D7B5A6",
+      ];
+
+      const attacks = {
+        0: "Normal",
+        1: "Exploits",
+        2: "Fuzzers",
+        3: "Generic",
+        4: "DoS",
+        5: "Backdoor",
+        6: "Analysis",
+        7: "Shellcode",
+      };
 
       var componentToHex = function (c) {
         var hex = c.toString(16);
@@ -112,6 +145,7 @@
 
       var z_scale = d3.scaleLinear().domain([0, 1]).range([0, 40]);
 
+      // Calibrate view position, field of view, and view orientation
       var view_pos = [360, 20, 360];
       var fov = 1;
       var view_or = [0, 1, 0, 0.8];
@@ -154,17 +188,36 @@
           .attr("onclick", "handleclick(this, event);")
           .append("shape")
           .call(makeGhost, function (d) {
-            return rgbToHex(d3.interpolateRdYlGn(1 - d.severity / 100));
+            return colors[d.attack_cat];
+            // return rgbToHex(d3.interpolateRdYlGn(1 - d.attack_cat / 100));
           })
           .append("sphere")
           .attr("radius", dotSize);
+
+        // Text properties
+        scene
+          .append("transform")
+          .attr("class", "label")
+          .attr("scale", "1 1 1")
+          .append("billboard")
+          .attr("axisOfRotation", "0 0 0")
+          .append("shape")
+          .call(makeSolid, "white")
+          .append("Text")
+          .attr("class", "labelText")
+          .attr("string", " ")
+          .append("fontstyle")
+          .attr("size", 1)
+          .attr("family", "SANS")
+          .attr("style", "BOLD")
+          .attr("justify", "END")
+          .attr("quality", "3");
       }
 
       // Generate Chart from my CSV Data
       function loadCSV(path) {
         d3.csv(path)
           .then((data) => {
-            // data = data.filter(d => d.Cluster == 100);
             console.log("length of data: ", data.length);
             console.log(data.slice(0, 3));
             var points = data.map((d, i) => {
@@ -174,12 +227,12 @@
               p.y = +d.z;
               p.cluster = +d.cluster;
               p.body = d.body;
-              p.severity = +d.severity;
+              p.attack_cat = +d.attack_cat;
               return p;
             });
             loadChart(points);
-            wordFreqs = createFrequencies(points);
-            console.log("word freqs: ", wordFreqs);
+            // wordFreqs = createFrequencies(points);
+            // console.log("word freqs: ", wordFreqs);
           })
           .finally(() => {
             x3dom.reload();
@@ -193,8 +246,10 @@
       function handlemouseover(target, event) {
         d3.select(".label").attr("translation", target.translation);
 
-        // d3.select(".labelText")
-        //     .attr('string', Math.round(target.__data__.severity) + '   ');
+        d3.select(".labelText").attr(
+          "string",
+          attacks[target.__data__.cluster] + "   "
+        );
 
         d3.select(event.hitObject)
           .select("appearance")
@@ -203,7 +258,7 @@
 
         d3.select("#summary").style("display", "inline");
 
-        d3.select(".sumText").html(target.__data__.body);
+        d3.select(".sumText").node().innerHTML = target.__data__.body;
       }
 
       function handlemouseout(target, event) {
@@ -211,18 +266,13 @@
           .select("appearance")
           .select("material")
           .attr("diffuseColor", function (d) {
-            return rgbToHex(d3.interpolateRdYlGn(1 - d.severity / 100));
+            return colors[d.attack_cat];
+            // return rgbToHex(d3.interpolateRdYlGn(1 - d.attack_cat / 100));
           });
       }
 
       function handleclick(target, event) {
-        // d3.select('#summary')
-        //   .style('display', 'inline');
-
-        // d3.select('.sumText')
-        //   .html(target.__data__.body);
-
-        d3.select("#wordcloud").style("display", "inline");
+        // d3.select("#wordcloud").style("display", "inline");
 
         d3.select("#opts")
           .style("display", "inline")
@@ -234,13 +284,10 @@
           .style("left", event.layerX + 180 + "px")
           .style("top", event.layerY + "px");
 
-        update(target.__data__.cluster, wordFreqs);
         clicked = target;
       }
 
       async function blink() {
-        // wait for enter key to execute query
-        await waitingKeypress();
         var txt = d3.select("input[type=search]").node().value.toLowerCase();
 
         d3.selectAll(".point")
@@ -301,8 +348,7 @@
           });
 
         // Get rid of label
-        // d3.select(".labelText")
-        //   .attr('string', ' ');
+        d3.select(".labelText").attr("string", " ");
 
         // Add to triage total
         incidents += count;
@@ -318,7 +364,7 @@
         console.log(`Name of file: ${filename}, temp URL: ${datapath}`);
         d3.select("#opts").style("display", "none");
         d3.select("#optsClose").style("display", "none");
-        wordFreqs = createFrequencies(datapath);
+        // wordFreqs = createFrequencies(datapath);
         loadCSV(datapath);
       }
 
@@ -339,7 +385,7 @@
         };
       };
     </script>
-    <script type="text/javascript" src="./lollipop.js"></script>
+    <!-- <script type="text/javascript" src="./lollipop.js"></script> -->
     <script type="text/javascript" src="./colorbar.js"></script>
   </body>
 </html>
